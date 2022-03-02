@@ -47,7 +47,12 @@ public class registro extends javax.swing.JFrame {
         txtConfirmPassword = new javax.swing.JPasswordField();
         txtPassword = new javax.swing.JPasswordField();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosed(java.awt.event.WindowEvent evt) {
+                formWindowClosed(evt);
+            }
+        });
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel1.setText("Usuario:");
@@ -239,6 +244,12 @@ public class registro extends javax.swing.JFrame {
     private void txtConfirmPasswordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtConfirmPasswordActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtConfirmPasswordActionPerformed
+
+    private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
+
+        inicio.frmReg = null;
+        
+    }//GEN-LAST:event_formWindowClosed
 
     /**
      * @param args the command line arguments

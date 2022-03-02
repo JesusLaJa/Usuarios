@@ -66,4 +66,43 @@ public class SqlUsuarios extends Conexion {
         return matcher.find();
     }
 
+    public boolean login(usuarios usr) throws SQLException {
+
+        //se llama la función SELECT y count para contar los ID de la tabla usuarios
+        String sql = "SELECT id, usuario, password, nombre, id_tipo FROM usuarios WHERE usuario = ?";
+
+        //se prepara la coneccion con sql
+        ps = con.prepareStatement(sql);
+        //se agrega el valor que se va a seleccionar
+        ps.setString(1, usr.getUsuario());
+        //se le asigna un valor a ResultSet
+        rs = ps.executeQuery();
+
+        //se recorre el conjunto de resultados de la consulta
+        if (rs.next()) {
+
+            //cuando la contraseña sea igual a la cnontraseña del usuariio
+            //ingresado se ejecutará el IF
+            if (usr.getPassword().equals(rs.getString(3))) {
+
+                //llamo a la función sql UPDATE y actualizo la fecha de ingreso
+                String sqlUpdate = "UPDATE usuarios SET last_session = ? WHERE id = ?";
+
+                //se prepara la coneccion con la declaración sql
+                ps = con.prepareStatement(sqlUpdate);
+                ps.setString(1, usr.getLast_session());
+                ps.setInt(2, rs.getInt(1));
+                ps.execute();
+
+                usr.setId(rs.getInt(1));
+                usr.setNombre(rs.getString(4));
+                usr.setId_tipo(rs.getInt(5));
+                return true;
+
+            } else {
+                return false;
+            }
+        }
+        return false;
+    }
 }

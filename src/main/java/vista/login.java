@@ -4,6 +4,17 @@
  */
 package vista;
 
+import java.util.Date;
+import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+import modelo.SqlUsuarios;
+import modelo.hash;
+import modelo.usuarios;
+
 /**
  *
  * @author pc
@@ -29,45 +40,127 @@ public class login extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         txtUsuario = new javax.swing.JTextField();
-        jTextField1 = new javax.swing.JTextField();
+        btnIngresar = new javax.swing.JButton();
+        txtPassword = new javax.swing.JPasswordField();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
 
         jLabel1.setText("Usuario:");
 
         jLabel2.setText("Contraseña:");
+
+        btnIngresar.setText("Ingresar");
+        btnIngresar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnIngresarActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(38, 38, 38)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel2)
-                    .addComponent(jLabel1))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(txtUsuario)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE))
-                .addContainerGap(192, Short.MAX_VALUE))
+                .addGap(36, 36, 36)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel1))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(txtUsuario)
+                            .addComponent(txtPassword, javax.swing.GroupLayout.DEFAULT_SIZE, 135, Short.MAX_VALUE)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(52, 52, 52)
+                        .addComponent(btnIngresar)))
+                .addContainerGap(41, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(56, 56, 56)
+                .addGap(49, 49, 49)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
                     .addComponent(txtUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(27, 27, 27)
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(177, Short.MAX_VALUE))
+                    .addComponent(txtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(29, 29, 29)
+                .addComponent(btnIngresar)
+                .addContainerGap(19, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnIngresarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIngresarActionPerformed
+
+        //se crea un nuevo objeto de tipo SqlUsuarios
+        SqlUsuarios modSql = new SqlUsuarios();
+        //se crea un nuevo objeto de tipo usuarios
+        usuarios mod = new usuarios();
+
+        //creo un nuevo ovjeto de tipo Date
+        Date date = new Date();
+        //creo un nuevo objeto de tipo SimpleDateFormat y s ele coloca el formato requerido
+        DateFormat fechaHora = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        //se convierte el campo de Password en String
+        String pass = new String(txtPassword.getPassword());
+
+        //evaluamos que los campos no estén vacíos
+        if (!txtUsuario.getText().equals("") && !pass.equals("")) {
+
+            //creo una variable tipo String
+            String nuevoPass = hash.sha1(pass);
+
+            //se obtienen los datos ingresados en la caja de texto
+            mod.setUsuario(txtUsuario.getText());
+            //se obtiene la contraseña ingresada en el cuadro de contraseña
+            mod.setPassword(nuevoPass);
+            //se obtiene la fecha a la que se ingresó
+            mod.setLast_session(fechaHora.format(date));
+
+            try {
+
+                if (modSql.login(mod)) {
+                    
+                    inicio.frmLog = null;
+                    //uso dispose para cerrar solo la ventana de login
+                    this.dispose();
+
+                    //llamo a la ventana home
+                    home frmHome = new home();
+                    //muestron el Frame home
+                    frmHome.setVisible(true);
+
+                } else {
+                    //muestro el mensaje en caso de que los datos ingresados no sean correctos
+                    JOptionPane.showMessageDialog(null, "Datos Incorrectos");
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(login.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        } else {
+            //muestro el mensaje en caso de que no haya datos en los cuadros
+            JOptionPane.showMessageDialog(null, "Debe ingresar sus datos");
+        }
+
+    }//GEN-LAST:event_btnIngresarActionPerformed
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+
+        inicio.frmLog = null;
+
+    }//GEN-LAST:event_formWindowClosing
 
     /**
      * @param args the command line arguments
@@ -105,9 +198,10 @@ public class login extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnIngresar;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JTextField jTextField1;
+    private javax.swing.JPasswordField txtPassword;
     private javax.swing.JTextField txtUsuario;
     // End of variables declaration//GEN-END:variables
 }
